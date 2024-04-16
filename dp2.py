@@ -1,7 +1,7 @@
 from pymongo import MongoClient, errors
 from bson.json_util import dumps
-import os, json
 from dotenv import load_dotenv
+import os, json
 
 load_dotenv()
 MONGOPASS = os.getenv('MONGOPASS')
@@ -11,10 +11,31 @@ client = MongoClient(uri, username='gwu8ek', password=MONGOPASS, connectTimeoutM
 db = client.testDB
 collection = db.testCollection
 
-with open('./data/generated00.json') as file:
-    file_data = json.load(file)
+data_dir = "./data"
 
-if isinstance(file_data, list):
-    collection.insert_many(file_data)  
-else:
-    collection.insert_one(file_data)
+complete_documents = 0
+could_not_import = 0
+corrupted_documents = 0
+
+# Traverse the data directory
+for filename in os.listdir(data_dir):
+    file_path = os.path.join(data_dir, filename)
+    try:
+        with open(file_path) as file:
+            file_data = json.load(file)
+            if isinstance(file_data, list):
+                collection.insert_many(file_data)
+                complete_documents += len(file_data)
+            else:
+                collection.insert_one(file_data)
+                complete_documents += 1
+    except Exception as e:
+        print(f"Error importing {filename}: {str(e)}")
+        could_not_import += 1
+
+total_documents = collection.count_documents({})
+corrupted_documents = total_documents - complete_documents
+
+print(f"complete documents: {complete_documents}")
+print(f"could not import: {could_not_import}")
+print(f"corrupted documents: {corrupted_documents}")
