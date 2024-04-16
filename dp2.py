@@ -17,7 +17,6 @@ complete_documents = 0
 could_not_import = 0
 corrupted_documents = 0
 
-# Traverse the data directory
 for filename in os.listdir(data_dir):
     file_path = os.path.join(data_dir, filename)
     try:
