@@ -24,16 +24,13 @@ for filename in os.listdir(data_dir):
             file_data = json.load(file)
             if isinstance(file_data, list):
                 collection.insert_many(file_data)
-                complete_documents += len(file_data)
             else:
                 collection.insert_one(file_data)
-                complete_documents += 1
+            complete_documents += len(file_data)
     except Exception as e:
-        print(f"Error importing {filename}: {str(e)}")
-        could_not_import += 1
-
-total_documents = collection.count_documents({})
-corrupted_documents = total_documents - complete_documents
+        print(f"error importing {filename}: {str(e)}")
+        could_not_import += len(file_data)
+        corrupted_documents += 1
 
 print(f"complete documents: {complete_documents}")
 print(f"could not import: {could_not_import}")
